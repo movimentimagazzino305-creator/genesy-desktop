@@ -1,9 +1,10 @@
 {
-  "version": "1.0.12",
-  "title": "FIX GENERICO",
+  "version": "1.0.14",
+  "title": "Etichette, Report",
   "changelog": [
-    "MANUTENZIONE"
+    "Modifica etichetta sidebar editor",
+    "Aggiornamento Report"
   ],
-  "createdAt": "2026-07-27T04:51:23.923Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.12/Genesy_Desktop_Setup_1.0.12.exe"
+  "createdAt": "2026-07-27T11:50:55.085Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.14/Genesy_Desktop_Setup_1.0.14.exe"
 }

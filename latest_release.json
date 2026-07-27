@@ -1,0 +1,13 @@
+{
+  "version": "1.0.11",
+  "title": "Fix definitivo popup aggiornamento",
+  "changelog": [
+    "Pulsante Ricordamelo piu tardi funziona: il popup non riappare per 24 ore",
+    "Popup aggiornamento non si riapre immediatamente dopo essere stato chiuso",
+    "Download installer da GitHub funzionante con gestione redirect automatici",
+    "Avvio installer tramite shell di sistema operativo (gestione UAC)",
+    "Badge versione Desktop visibile nella sidebar"
+  ],
+  "createdAt": "2026-07-26T13:08:07.098Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.11/Genesy_Desktop_Setup_1.0.11.exe"
+}

@@ -1,10 +1,12 @@
 {
-  "version": "1.0.14",
-  "title": "Etichette, Report",
+  "version": "1.0.15",
+  "title": "Avvio rapido, Auto-login e Cache SWR",
   "changelog": [
-    "Modifica etichetta sidebar editor",
-    "Aggiornamento Report"
+    "Avvio rapido sotto 1 secondo",
+    "Auto-login automatico in background",
+    "Cache preventivi immediata senza attese",
+    "Protezione tasto disconnetti"
   ],
-  "createdAt": "2026-07-27T11:50:55.085Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.14/Genesy_Desktop_Setup_1.0.14.exe"
+  "createdAt": "2026-09-03T16:34:51.220Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.15/Genesy_Desktop_Setup_1.0.15.exe"
 }

@@ -1,0 +1,12 @@
+{
+  "version": "1.0.25",
+  "title": "Aggiornamento Genesy Desktop v1.0.25",
+  "changelog": [
+    "Fix ricerca e autocompilazione battiscopa e prodotti nella riga preventivo",
+    "Riconoscimento automatico articoli battiscopa abbreviati (Batt., Bat)",
+    "Ripristino campo obbligatorio Anno esecuzione lavoro nell'editor",
+    "Ottimizzazioni interfaccia e correzioni generali"
+  ],
+  "createdAt": "2026-09-05T09:59:48.530Z",
+  "downloadUrl": "https://genesy.netlify.app/Genesy_Desktop_Setup.exe"
+}

@@ -1,0 +1,66 @@
+{
+  "name": "genesy-desktop",
+  "version": "1.0.25",
+  "description": "Genesy Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "dist": "npx electron-builder --win",
+    "dist:mac": "npx electron-builder --mac",
+    "dist:mac-universal": "npx electron-builder --mac --universal"
+  },
+  "build": {
+    "appId": "com.genesy.desktop",
+    "productName": "Genesy Desktop",
+    "electronVersion": "31.0.0",
+    "npmRebuild": false,
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/**",
+      "!Manual_Backups/**",
+      "!*.ps1",
+      "!*.bat",
+      "!*.docx",
+      "!*.bak",
+      "!*.sql",
+      "!release.js"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "icon.ico",
+      "category": "public.app-category.business"
+    },
+    "dmg": {
+      "title": "Genesy Desktop Installer"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Genesy Desktop",
+      "runAfterFinish": true
+    }
+  },
+  "keywords": [
+    "genesy",
+    "desktop",
+    "preventivi",
+    "crm"
+  ],
+  "author": "Antigravity",
+  "license": "ISC"
+}

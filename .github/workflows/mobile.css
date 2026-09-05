@@ -1,0 +1,760 @@
+/*
+ * GENESY – MOBILE & TABLET RESPONSIVE STYLES
+ * Version: 1.0
+ * Breakpoints:
+ *   Tablet  : max-width 1024px
+ *   Mobile  : max-width 767px
+ *   Small   : max-width 480px
+ *
+ * NOTA: Questo file estende/sovrascrive styles.css per dispositivi touch.
+ *       Non tocca le regole desktop (min-width: 1025px).
+ */
+
+/* ==========================================================================
+   GLOBAL TOUCH IMPROVEMENTS (tutti i dispositivi)
+   ========================================================================== */
+* {
+    -webkit-tap-highlight-color: transparent;
+    /* Rimuove flash blu su tap mobile */
+}
+
+/* Scrollbar nascosta su touch (più pulito) */
+@media (max-width: 1024px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+}
+
+/* ==========================================================================
+   TABLET (≤ 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+
+    /* --- Touch Target Minimum (44×44px WCAG 2.5.5) --- */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-create-quote,
+    .btn-icon,
+    .nav-btn,
+    .tab-btn,
+    .status-tab,
+    .crm-btn,
+    .picker-item {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .btn-icon {
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* --- Sidebar Overlay (z-index raffinato) --- */
+    .sidebar-overlay {
+        z-index: 9998 !important;
+        /* Sotto la sidebar (9999) ma sopra tutto il resto */
+    }
+
+    /* --- Main Content --- */
+    .main-content {
+        padding: 1rem;
+        padding-bottom: 2rem;
+    }
+
+    /* --- View Header --- */
+    .view-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 1.2rem;
+    }
+
+    .view-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .header-actions .btn-primary,
+    .header-actions .btn-secondary,
+    .header-actions .btn-create-quote {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-width: 140px;
+    }
+
+    /* --- Controls Bar (Filtri) --- */
+    .controls-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px 0;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1 1 160px;
+        max-width: 100%;
+    }
+
+    .search-input,
+    .filter-select {
+        width: 100%;
+        min-height: 40px;
+        font-size: 0.95rem;
+    }
+
+    /* --- Dashboard Grid: 2 colonne su tablet --- */
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+
+    /* Widget row: rimane 2 col su tablet --- */
+    .dashboard-widgets-row {
+        grid-template-columns: 1fr 1fr;
+        display: grid;
+        gap: 16px;
+    }
+
+    /* --- CRM Grid: 2 col su tablet --- */
+    .crm-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px;
+    }
+
+    .crm-client-identity h1 {
+        font-size: 1.5rem;
+    }
+
+    /* --- Date Filter Bar: wrappa su tablet stretto --- */
+    .date-filter-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-right: 0;
+    }
+
+    /* --- Quotes Toolbar --- */
+    .quotes-toolbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .status-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    .status-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .toolbar-bottom {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* --- Stats Controls --- */
+    .stats-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* --- Editor Toolbar (tablet): resta in alto ma si compatta --- */
+    .editor-toolbar {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+
+    .toolbar-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* --- Settings Grid --- */
+    .settings-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* --- Card padding ridotto --- */
+    .card {
+        padding: 1rem;
+    }
+
+    .crm-card {
+        padding: 14px;
+    }
+
+    /* --- KPI Stats row su CRM --- */
+    .crm-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}
+
+/* ==========================================================================
+   MOBILE (≤ 767px)
+   ========================================================================== */
+@media (max-width: 767px) {
+
+    /* --- Body & Layout --- */
+    body {
+        font-size: 15px;
+    }
+
+    .main-content {
+        padding: 0.75rem;
+        padding-bottom: 4rem;
+        /* Spazio per toolbar fissa in basso */
+    }
+
+    /* --- View Header --- */
+    .view-header h1 {
+        font-size: 1.4rem;
+    }
+
+    /* Header actions: pulsanti a riga intera --- */
+    .header-actions .btn-primary,
+    .header-actions .btn-secondary,
+    .header-actions .btn-create-quote,
+    .header-actions .btn-danger {
+        width: 100%;
+        flex: unset;
+    }
+
+    /* --- Dashboard Grid: 1 colonna --- */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem;
+    }
+
+    /* Widget row: 1 colonna --- */
+    .dashboard-widgets-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    /* KPI Value: font ridotto --- */
+    .kpi-value {
+        font-size: 1.8rem !important;
+    }
+
+    /* --- Sidebar: rimane off-canvas, ottimizzata 80vw --- */
+    .sidebar {
+        width: min(280px, 80vw) !important;
+    }
+
+    /* --- Mobile Menu Btn: più prominente --- */
+    .mobile-menu-btn {
+        margin-bottom: 12px;
+        font-size: 1rem;
+    }
+
+    /* --- Controls Bar: stack verticale --- */
+    .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+        flex: unset;
+    }
+
+    .search-input,
+    .filter-select,
+    .modern-search-input {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+    }
+
+    /* --- Tabelle Data: font ridotto + scroll orizzontale --- */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius-md);
+    }
+
+    .data-table th,
+    .data-table td {
+        font-size: 0.82rem;
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+
+    .simple-table {
+        font-size: 0.82rem;
+    }
+
+    .simple-table th,
+    .simple-table td {
+        padding: 6px 4px;
+    }
+
+    /* --- Paper Canvas (Editor Preventivo) --- */
+    .paper-canvas {
+        width: 100% !important;
+        min-width: unset !important;
+        padding: 12px !important;
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+        margin-bottom: 90px !important;
+        /* Spazio per toolbar fissa in basso */
+        font-size: 0.82rem;
+        /* Scala il testo del documento */
+    }
+
+    .paper-container {
+        width: 100% !important;
+        min-width: unset !important;
+        padding-bottom: 90px;
+    }
+
+    /* Intestazione doc: verticale --- */
+    .doc-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Tabella prodotti nel preventivo --- */
+    .doc-table {
+        font-size: 0.8rem;
+    }
+
+    .doc-table th,
+    .doc-table td {
+        padding: 2px 3px;
+    }
+
+    /* Footer doc --- */
+    .doc-footer {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .notes {
+        width: 100%;
+    }
+
+    .totals {
+        width: 100%;
+        text-align: left;
+    }
+
+    /* --- Editor Toolbar: sticky in basso su mobile --- */
+    .editor-toolbar {
+        position: fixed !important;
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border-top: 1px solid #e2e8f0 !important;
+        border-bottom: none !important;
+        padding: 8px 10px !important;
+        z-index: 999 !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 6px !important;
+        background: white !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .toolbar-actions {
+        flex-wrap: nowrap;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .toolbar-actions .btn-primary,
+    .toolbar-actions .btn-secondary {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 0.82rem;
+        padding: 0.5rem 0.8rem;
+    }
+
+    /* --- Modali: quasi full-screen su mobile --- */
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 92dvh !important;
+        border-radius: 16px 16px 0 0 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 !important;
+        top: auto !important;
+        padding: 1.2rem !important;
+    }
+
+    /* Aggiusta il posizionamento del modal container --- */
+    .modal {
+        align-items: flex-end !important;
+        justify-content: center !important;
+    }
+
+    /* Mini modal rimane centrato --- */
+    .modal-content.modal-mini {
+        position: relative !important;
+        top: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+        border-radius: 16px !important;
+        width: 90% !important;
+        max-width: 340px !important;
+        margin: auto !important;
+    }
+
+    .modal-content.modal-mini+.modal {
+        align-items: center !important;
+    }
+
+    /* --- Form Rows: stack verticale --- */
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .form-group {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* --- Date Filter Bar: stack verticale --- */
+    .date-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .date-filter-bar .filter-item {
+        width: 100%;
+    }
+
+    .date-filter-bar input[type='date'] {
+        width: 100%;
+    }
+
+    /* --- Stats Controls: stack --- */
+    .stats-controls {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .stats-controls input,
+    .stats-controls button {
+        width: 100%;
+    }
+
+    /* --- CRM: 1 colonna su mobile --- */
+    .crm-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+
+    /* CRM Header: stack --- */
+    .crm-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 16px;
+    }
+
+    .crm-client-identity h1 {
+        font-size: 1.3rem;
+    }
+
+    .crm-actions {
+        width: 100%;
+    }
+
+    .crm-actions .crm-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* CRM Stat Row: 2 colonne --- */
+    .crm-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .crm-stat-value {
+        font-size: 1.4rem;
+    }
+
+    /* --- Quotes Toolbar --- */
+    .quotes-toolbar {
+        padding: 0.75rem;
+    }
+
+    /* Status tabs: scrollabili orizzontalmente --- */
+    .status-tabs {
+        gap: 6px;
+    }
+
+    .status-tab {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.88rem;
+        white-space: nowrap;
+    }
+
+    /* --- Toolbar bottom delle quote: stack --- */
+    .toolbar-bottom {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .toolbar-bottom .btn-group {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .toolbar-bottom .btn-group .btn-primary,
+    .toolbar-bottom .btn-group .btn-secondary {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* --- Settings Grid: 1 colonna --- */
+    .settings-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- Tab Controls: scrollabili --- */
+    .tab-controls {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        gap: 4px;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+    }
+
+    .tab-controls::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* --- Calendar: ridotto su mobile --- */
+    .calendar-grid {
+        max-width: 100%;
+        gap: 2px;
+    }
+
+    .cal-day {
+        padding: 5px 3px;
+        font-size: 0.82rem;
+    }
+
+    .cal-day-name {
+        font-size: 0.75rem;
+        padding: 3px;
+    }
+
+    /* --- Picker List: altezza ridotta --- */
+    .picker-list {
+        max-height: 220px;
+    }
+
+    /* --- Calcolatrice: full-screen centrata --- */
+    .floating-calculator {
+        width: 92vw !important;
+        max-width: 320px !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+}
+
+
+/* ==========================================================================
+   SMALL MOBILE (≤ 480px)
+   ========================================================================== */
+@media (max-width: 480px) {
+
+    /* --- Body font base ridotto --- */
+    body {
+        font-size: 14px;
+    }
+
+    /* --- Main Content: padding minimo --- */
+    .main-content {
+        padding: 0.5rem;
+        padding-bottom: 4rem;
+    }
+
+    /* --- Card compatta --- */
+    .card {
+        padding: 0.75rem;
+    }
+
+    .crm-card {
+        padding: 10px;
+    }
+
+    /* --- View Header: testo ancora più piccolo --- */
+    .view-header h1 {
+        font-size: 1.25rem;
+    }
+
+    /* --- Mobile Menu Btn: full width --- */
+    .mobile-menu-btn {
+        width: 100%;
+        margin-bottom: 10px;
+        border-radius: var(--radius-md);
+    }
+
+    /* --- Bottoni primari: full width in certi contesti --- */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        font-size: 0.9rem;
+        padding: 0.55rem 0.9rem;
+    }
+
+    /* --- Editor Toolbar: testo icone nascosto, solo icone --- */
+    .editor-toolbar .btn-primary span,
+    .editor-toolbar .btn-secondary span {
+        display: none;
+    }
+
+    /* Pulsanti toolbar: solo icona + padding ridotto --- */
+    .toolbar-actions .btn-primary,
+    .toolbar-actions .btn-secondary {
+        padding: 0.55rem 0.7rem;
+        gap: 0;
+    }
+
+    /* KPI Value: ulteriormente ridotto --- */
+    .kpi-value {
+        font-size: 1.6rem !important;
+    }
+
+    /* CRM header: titolo ridotto --- */
+    .crm-client-identity h1 {
+        font-size: 1.15rem;
+    }
+
+    /* CRM stat values --- */
+    .crm-stat-value {
+        font-size: 1.2rem;
+    }
+
+    /* --- Modali mini: quasi full-width --- */
+    .modal-content.modal-mini {
+        width: 96% !important;
+    }
+
+    /* --- Paper Canvas: font ancora ridotto --- */
+    .paper-canvas {
+        font-size: 0.75rem !important;
+        padding: 8px !important;
+    }
+
+    .doc-table {
+        font-size: 0.72rem;
+    }
+
+    /* --- Status Tab: solo icona su phone piccoli --- */
+    .status-tab .tab-count {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   PRINT – assicura che le regole mobile non interferiscano con la stampa
+   ========================================================================== */
+@media print {
+
+    .editor-toolbar {
+        position: static !important;
+        display: flex !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 0 1rem 0 !important;
+    }
+
+    .paper-canvas {
+        width: 210mm !important;
+        min-width: 210mm !important;
+        padding: 20mm !important;
+        font-size: inherit !important;
+        margin-bottom: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .paper-container {
+        width: 210mm !important;
+        min-width: 210mm !important;
+    }
+
+    .sidebar,
+    .mobile-menu-btn,
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    .main-content {
+        padding: 0 !important;
+    }
+}
+
+/* ==========================================================================
+   PRODUCTS PAGE – header buttons always on one scrollable row
+   ========================================================================== */
+@media (max-width: 1024px) {
+    #products .header-actions {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 2px;
+        gap: 6px;
+    }
+
+    #products .header-actions > * {
+        flex: 0 0 auto !important;
+        min-width: unset !important;
+        width: auto !important;
+        white-space: nowrap;
+        font-size: 0.8rem !important;
+        padding: 6px 10px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #products .header-actions .btn-primary,
+    #products .header-actions .btn-secondary,
+    #products .header-actions .btn-danger,
+    #products .header-actions button {
+        width: auto !important;
+        flex: 0 0 auto !important;
+    }
+}

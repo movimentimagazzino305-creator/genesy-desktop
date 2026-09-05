@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Schede di cantiere Parquet</title>
+    
+    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="sopralluoghi.css">
+    <style>
+        #stairsTableBody tr.drag-over { background: #ede9fe !important; outline: 2px dashed #7c3aed; }
+        #stairsTableBody tr[draggable] .drag-handle { cursor: grab; }
+        #stairsTableBody tr[draggable]:active .drag-handle { cursor: grabbing; }
+        #roomsTableBody tr.drag-over { background: #dbeafe !important; outline: 2px dashed #2563eb; }
+        /* Widget Posa */
+        .posa-row { display:flex; align-items:center; gap:8px; min-height: 32px; }
+        .posa-label { display:flex; align-items:center; gap:6px; min-width:220px; font-size:0.9em; color:#1e293b; cursor:pointer; flex-shrink:0; user-select:none; }
+        .posa-label input[type="checkbox"] { width:16px; height:16px; accent-color:#3b82f6; flex-shrink:0; cursor:pointer; }
+        .posa-row .posa-detail { flex:1; font-size:0.85em; padding:5px 8px; height:30px; display:none; transition:opacity 0.2s; }
+        .posa-row.active .posa-detail { display:block; }
+        @media (max-width: 500px) { .posa-label { min-width: 160px; font-size:0.82em; } }
+        /* Toast conferma mq */
+        @keyframes fadeInToast { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+        .mq-confirm-toast { bottom: calc(100% + 4px); left: 0; right: 0; }
+    </style>
+    
+    <!-- Supabase Core -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>initSupabase();</script>
+    <script src="auth.js"></script>
+    <script src="data-supabase.js"></script>
+    
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> CRM</a>
+                <h1>Schede di cantiere Parquet</h1>
+            </div>
+        </header>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Caricamento in corso...</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="step-start" class="step-container" style="display: none;">
+            <div class="start-hero">
+                <i class="fa-solid fa-clipboard-check hero-icon"></i>
+                <h2>Nuova Scheda di cantiere</h2>
+                <p>Compila la scheda tecnica dettando le risposte vocalmente.</p>
+                <button id="btnStartForm" class="btn-primary btn-large" style="margin-bottom: 10px;" onclick="SopralluogoApp.startNewSheet()">
+                    <i class="fa-solid fa-plus"></i> Inizia Nuova Scheda
+                </button>
+                <button id="btnGuidedForm" class="btn-secondary btn-large" style="background:#4ade80; color:#fff; border:none;" onclick="SopralluogoApp.startGuidedVoice()">
+                    <i class="fa-solid fa-microphone-lines"></i> Compilazione Vocale Guidata
+                </button>
+                <div style="margin-top: 25px; text-align: left;">
+                    <label style="font-size: 0.85em; color: #666; font-weight: 500;">Impostazioni Voce Guida</label>
+                    <select id="voiceSelect" class="form-control" style="margin-top: 5px; font-size: 0.9em; padding: 8px;" onchange="SopralluogoApp.onChangeVoice(this.value)">
+                        <option value="">Caricamento voci...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="recent-list">
+                <h3>Schede di Cantiere Recenti</h3>
+                <p style="font-size:0.85em; color:#64748b; margin-top:-5px; margin-bottom:10px;">Clicca su una scheda per riaprirla e visualizzarne l'anteprima/PDF o modificarla.</p>
+                <div style="position:relative; margin-bottom:10px;">
+                    <input type="search" id="recentSearchBar" placeholder="🔍 Cerca per nome, indirizzo..." oninput="SopralluogoApp.filterRecenti(this.value)" style="width:100%; box-sizing:border-box; padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none; background:#f8fafc;">
+                </div>
+                <ul id="recentSopralluoghiList" class="sopralluoghi-list">
+                    <!-- Populated via JS -->
+                    <li class="empty-state">Nessuna scheda di cantiere salvata.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Form Unico Continuo -->
+        <div id="step-form" class="step-container" style="display: none;">
+            <div class="step-header">
+                <h3>Scheda di Cantiere (Unico Step)</h3>
+            </div>
+            
+            <div style="background:#f1f5f9; padding:8px 15px; margin-bottom:15px; border-radius:6px; border-left:4px solid #3b82f6;">
+                <h4 style="margin:0; color:#1e293b; font-size:1.1em;">1. Anagrafica e Logistica</h4>
+            </div>
+            <div class="form-group">
+                <label>Seleziona Cliente Esistente (Opzionale)</label>
+                <select id="clientSelect" class="form-control" onchange="SopralluogoApp.onClientSelect(this.value)">
+                    <option value="">-- Seleziona --</option>
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nome / Ragione Sociale Cliente * <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Nome o Ragione Sociale del cliente')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <input type="text" id="clientName" class="form-control" required>
+                    <button class="btn-mic" data-target="clientName" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            
+            <div class="form-group" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; margin-bottom: 15px;">
+                <label style="color:#475569; font-weight:600;"><i class="fa-regular fa-building"></i> Gestione Condomini o Grandi Progetti (Opzionale)</label>
+                
+                <div style="margin-top: 10px;">
+                    <label>Nome Condominio / Progetto <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Nome del condominio o cantiere principale')"><i class="fa-solid fa-volume-high"></i></button></label>
+                    <div class="input-with-mic">
+                        <input type="text" id="clientCantiere" class="form-control" placeholder="Es. Condominio Le Querce">
+                        <button class="btn-mic" data-target="clientCantiere" type="button"><i class="fa-solid fa-microphone"></i></button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <label>Identificativo Unità (Scala, Interno, Piano) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Identificativo della singola unità, come scala o interno')"><i class="fa-solid fa-volume-high"></i></button></label>
+                    <div class="input-with-mic">
+                        <input type="text" id="clientUnita" class="form-control" placeholder="Es. App. Rossi - Scala B, Int 4">
+                        <button class="btn-mic" data-target="clientUnita" type="button"><i class="fa-solid fa-microphone"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Architetto / Geometra / Impresa <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Architetto, Geometra o Impresa di riferimento')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <input type="text" id="clientImpresa" class="form-control">
+                    <button class="btn-mic" data-target="clientImpresa" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Indirizzo Cantiere * (es. Via, Città) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Indirizzo completo del cantiere')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="clientAddress" class="form-control" rows="2" required></textarea>
+                    <button class="btn-mic" data-target="clientAddress" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Telefono <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Numero di telefono')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <input type="tel" id="clientTelefono" class="form-control">
+                    <button class="btn-mic" data-target="clientTelefono" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email Cliente <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Indirizzo email del cliente')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <input type="email" id="clientEmail" class="form-control">
+                    <button class="btn-mic" data-target="clientEmail" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Posatore Assegnato <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Posatore assegnato al cantiere')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <input type="text" id="clientPosatore" class="form-control">
+                    <button class="btn-mic" data-target="clientPosatore" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tempi Previsti (Consegna / Posa) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Tempi previsti per consegna e posa')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div style="display:flex; gap:10px; margin-bottom:8px;">
+                    <div style="flex:1;">
+                        <span style="font-size:11px; color:#64748b; margin-bottom:2px; display:block;">Da:</span>
+                        <input type="date" id="clientTempiDa" class="form-control">
+                    </div>
+                    <div style="flex:1;">
+                        <span style="font-size:11px; color:#64748b; margin-bottom:2px; display:block;">A:</span>
+                        <input type="date" id="clientTempiA" class="form-control">
+                    </div>
+                </div>
+                <div class="input-with-mic">
+                    <input type="text" id="clientTempi" class="form-control" placeholder="(Compilato dal calendario o testo libero)">
+                    <button class="btn-mic" data-target="clientTempi" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Logistica della Consegna <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Logistica scarico merce, zone ZTL, gru o piani superiori')"><i class="fa-solid fa-volume-high"></i></button></label>
+                
+                <select id="logisticaCasiSelect" class="form-control" style="margin-bottom: 8px;" onchange="if(this.value) { document.getElementById('clientLogisticaConsegna').value = (document.getElementById('clientLogisticaConsegna').value ? document.getElementById('clientLogisticaConsegna').value + '\n' : '') + this.value; this.value=''; }">
+                    <option value="">-- Seleziona casistica frequente --</option>
+                    <option value="Standard / Libero">Standard / Accesso libero</option>
+                    <option value="Zona ZTL Centro Storico">ZTL / Centro Storico</option>
+                    <option value="Strada stretta (furgone piccolo)">Strada stretta (furgone piccolo)</option>
+                    <option value="Scarico al piano senza ascensore">Scarico al piano senza ascensore</option>
+                    <option value="Scarico al piano con ascensore">Scarico al piano con ascensore</option>
+                    <option value="Utile carrellino">Utile carrellino</option>
+                    <option value="scarico con gru di cantiere">scarico con gru di cantiere</option>
+                    <option value="No Parcheggio / Divieto Sosta">Divieto di sosta / Scarico difficile</option>
+                </select>
+
+                <div class="input-with-mic">
+                    <textarea id="clientLogisticaConsegna" class="form-control" rows="2" placeholder="Dettagli logistica... (Es. ZTL, Furgone stretto, Scarico al 3° piano)"></textarea>
+                    <button class="btn-mic" data-target="clientLogisticaConsegna" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            
+            
+            <!-- Sezione 2: Ispezione Tecnica -->
+            <hr style="margin: 30px 0; border:0; border-top:1px solid #cbd5e1;">
+            <div style="background:#f1f5f9; padding:8px 15px; margin-bottom:15px; border-radius:6px; border-left:4px solid #8b5cf6;">
+                <h4 style="margin:0; color:#1e293b; font-size:1.1em;">2. Ispezione Tecnica</h4>
+            </div>
+
+            <!-- Materiali e Posa -->
+            <div class="form-group">
+                <label>Tipologia e formato materiale (Prodotto e Battiscopa) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Tipologia e formato materiale previsto, incluso battiscopa')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techMateriale" class="form-control" rows="3" placeholder="Aggiungi dettagli prodotto..."></textarea>
+                    <button class="btn-mic" data-target="techMateriale" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Metodo e Verso di Posa <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Metodo e verso di posa')"><i class="fa-solid fa-volume-high"></i></button></label>
+                
+                <!-- Campo nascosto che viene sincronizzato automaticamente -->
+                <textarea id="techPosa" style="display:none;"></textarea>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:12px;">
+
+                    <!-- SEZIONE: Metodo di posa -->
+                    <div>
+                        <div style="font-size:0.8em; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;"><i class="fa-solid fa-layer-group" style="color:#3b82f6;"></i> Metodo di Posa</div>
+                        <div style="display:flex; flex-direction:column; gap:6px;" id="posa-metodo-list">
+                            <div class="posa-row">
+                                <label class="posa-label"><input type="checkbox" class="posa-chk" data-label="Incollato" onchange="SopralluogoApp.syncPosaField(); if(this.checked) { let inp = this.closest('.posa-row').querySelector('.posa-detail'); inp.focus(); try{ inp.showPicker(); } catch(e){} }"> Incollato</label>
+                                <input type="text" class="posa-detail form-control" list="colla-list" placeholder="dettaglio (es. colla bicomponente)" oninput="SopralluogoApp.syncPosaField()">
+                                <datalist id="colla-list">
+                                    <option value="Colla bicomponente">
+                                    <option value="Colla mono componente">
+                                </datalist>
+                            </div>
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="Flottante" onchange="SopralluogoApp.syncPosaField()"> Flottante</label><input type="text" class="posa-detail form-control" placeholder="dettaglio (es. su materassino 3mm)" oninput="SopralluogoApp.syncPosaField()"></div>
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="Click" onchange="SopralluogoApp.syncPosaField()"> Sistema Click</label><input type="text" class="posa-detail form-control" placeholder="dettaglio (es. Unilin Clic)" oninput="SopralluogoApp.syncPosaField()"></div>
+                        </div>
+                    </div>
+
+                    <hr style="border:0; border-top:1px dashed #cbd5e1; margin:0;">
+
+                    <!-- SEZIONE: Verso e Schema -->
+                    <div>
+                        <div style="font-size:0.8em; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;"><i class="fa-solid fa-arrows-left-right" style="color:#8b5cf6;"></i> Verso e Schema di Posa</div>
+                        <div style="display:flex; flex-direction:column; gap:6px;" id="posa-verso-list">
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="A correre" onchange="SopralluogoApp.syncPosaField(); if(this.checked) { let inp = this.closest('.posa-row').querySelector('.posa-detail'); inp.focus(); try{ inp.showPicker(); } catch(e){} }"> A correre</label><input type="text" class="posa-detail form-control" list="diagonale-list" placeholder="dettaglio (es. in Diagonale)" oninput="SopralluogoApp.syncPosaField()"></div>
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="A cassero" onchange="SopralluogoApp.syncPosaField(); if(this.checked) { let inp = this.closest('.posa-row').querySelector('.posa-detail'); inp.focus(); try{ inp.showPicker(); } catch(e){} }"> A cassero</label><input type="text" class="posa-detail form-control" list="diagonale-list" placeholder="dettaglio (es. in Diagonale)" oninput="SopralluogoApp.syncPosaField()"></div>
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="Spina" onchange="SopralluogoApp.syncPosaField()"> Spina</label><input type="text" class="posa-detail form-control" placeholder="dettaglio (es. angolo 90°)" oninput="SopralluogoApp.syncPosaField()"></div>
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="Spina francese" onchange="SopralluogoApp.syncPosaField()"> Spina francese</label><input type="text" class="posa-detail form-control" placeholder="dettaglio" oninput="SopralluogoApp.syncPosaField()"></div>
+                            <div class="posa-row"><label class="posa-label"><input type="checkbox" class="posa-chk" data-label="Altre pose" onchange="SopralluogoApp.syncPosaField()"> Altre pose</label><input type="text" class="posa-detail form-control" placeholder="dettaglio" oninput="SopralluogoApp.syncPosaField()"></div>
+                            <datalist id="diagonale-list"><option value="in Diagonale"></datalist>
+                        </div>
+                    </div>
+
+                    <hr style="border:0; border-top:1px dashed #cbd5e1; margin:0;">
+
+                    <!-- NOTE LIBERE -->
+                    <div>
+                        <div style="font-size:0.8em; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;"><i class="fa-solid fa-pencil" style="color:#10b981;"></i> Note aggiuntive</div>
+                        <div class="input-with-mic">
+                            <textarea id="techPosaNote" class="form-control" rows="2" placeholder="Altre specifiche di posa..." oninput="SopralluogoApp.syncPosaField()"></textarea>
+                            <button class="btn-mic" data-target="techPosaNote" type="button"><i class="fa-solid fa-microphone"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Anteprima testo generato -->
+                <div id="posaPreview" style="display:none; margin-top:8px; font-size:12px; color:#64748b; background:#f1f5f9; padding:8px 10px; border-radius:6px; border-left:3px solid #3b82f6;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Accessori Necessari (Regette, Scivoli, Giunti, Verniciature) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Accessori necessari come regette, scivoli, giunti')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <details style="margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff;">
+                    <summary style="padding: 8px 12px; cursor: pointer; font-size: 0.9em; font-weight: 500; color: #475569; user-select: none;">Seleziona Profili da Anagrafica...</summary>
+                    <div id="profiliCheckboxesContainer" style="padding: 8px 12px; max-height: 150px; overflow-y: auto; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.85em; display:flex; flex-direction:column; gap:4px;">
+                        <span style="color:#94a3b8;">Caricamento profili...</span>
+                    </div>
+                </details>
+                <div class="input-with-mic">
+                    <textarea id="techAccessori" class="form-control" rows="2" placeholder="Dettagli accessori necessari..."></textarea>
+                    <button class="btn-mic" data-target="techAccessori" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <!-- Stato Sito -->
+            <div class="form-group" style="padding: 15px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-bottom: 20px;">
+                <label>Dettagli Massetto (Nuovo, Data posa, Riscaldato, Primer) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Dettagli del massetto')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techSottofondo" class="form-control" rows="2"></textarea>
+                    <button class="btn-mic" data-target="techSottofondo" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label for="photoMassetto" style="font-size: 0.85em; display: inline-block; padding: 6px 12px; background: #e2e8f0; border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-camera"></i> Fai una Foto al Massetto</label>
+                    <input type="file" id="photoMassetto" accept="image/*" capture="environment" style="display:none;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Pavimento Preesistente (e necessità di grattare) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Pavimento preesistente e necessità di grattare')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techPreesistente" class="form-control" rows="2"></textarea>
+                    <button class="btn-mic" data-target="techPreesistente" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Rilievi di Umidità e Piano di posa <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Rilievi umidità e descrizione piano di posa')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techUmidita" class="form-control" rows="2"></textarea>
+                    <button class="btn-mic" data-target="techUmidita" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Taglio Porte (Interne e Finestre) / Lavorazioni Extra <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Taglio porte e finestre, o lavorazioni extra')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techTaglioPorte" class="form-control" rows="2"></textarea>
+                    <button class="btn-mic" data-target="techTaglioPorte" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <!-- Misure e Stanze (Tabella Analitica) -->
+            <div class="form-group" style="padding: 15px; border: 2px solid #3b82f6; border-radius: 8px; margin-bottom: 20px; background: #eff6ff;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label style="color:#1d4ed8; font-weight:700; margin: 0;"><i class="fa-solid fa-table"></i> Elenco Misure e Stanze</label>
+                    <button class="btn-success" type="button" style="background:#10b981; padding: 4px 10px; font-size: 0.85em;" onclick="SopralluogoApp.exportRoomsExcel()"><i class="fa-solid fa-file-excel"></i> File CSV (Stanze e Scale)</button>
+                </div>
+                
+                <p style="font-size: 0.8em; color: #475569; margin-bottom: 15px;">Aggiungi una riga per ogni misura rilevata. Se una stanza ha forme irregolari, usa più righe con lo stesso nome (es. "Salotto"). L'Excel le sommerà in automatico.</p>
+                
+                <div style="overflow-x: auto; margin-bottom: 15px;">
+                    <table class="table" style="width: 100%; min-width: 500px; background: #fff; border-collapse: collapse; text-align: left; font-size: 0.9em;">
+                        <thead style="background: #dbeafe; color: #1e40af;">
+                            <tr>
+                                <th style="padding: 8px; border: 1px solid #bfdbfe; width:18%; min-width:100px;">Stanza</th>
+                                <th style="padding: 8px; border: 1px solid #bfdbfe; width:13%; min-width:64px; text-align:center;">Lung.(m)</th>
+                                <th style="padding: 8px; border: 1px solid #bfdbfe; width:13%; min-width:64px; text-align:center;">Larg.(m)</th>
+                                <th style="padding: 8px; border: 1px solid #bfdbfe; width:22%; min-width:80px; text-align:center; color:#1d4ed8;">Mq</th>
+                                <th style="padding: 8px; border: 1px solid #bfdbfe; width:22%; min-width:80px; text-align:center; color:#065f46;">Ml (Opz)</th>
+                                <th style="padding: 8px; border: 1px solid #bfdbfe; width:40px; text-align:center;"><i class="fa-solid fa-trash"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomsTableBody">
+                            <!-- JS injected rows -->
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #f1f5f9; font-weight: bold;">
+                                <td colspan="3" style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">TOTALI TABELLA:</td>
+                                <td id="tblTotMq" style="padding: 8px; border: 1px solid #cbd5e1; text-align:center; color:#1d4ed8; font-size:1.05em;">0.00</td>
+                                <td id="tblTotMl" style="padding: 8px; border: 1px solid #cbd5e1; text-align:center; color:#065f46; font-size:1.05em;">0.00</td>
+                                <td style="border: 1px solid #cbd5e1;"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
+                    <button class="btn-primary" type="button" onclick="SopralluogoApp.addRoomRow()"><i class="fa-solid fa-plus"></i> Aggiungi Riga Manuale</button>
+                    <button class="btn-primary" style="background:#8b5cf6;" type="button" onclick="SopralluogoApp.startTableDictation()"><i class="fa-solid fa-microphone"></i> Dettatura Vocale Riga</button>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <label for="scan3D" style="font-size: 0.85em; display: inline-block; padding: 6px 12px; background: #bfdbfe; color:#1d4ed8; border-radius: 4px; cursor: pointer; font-weight:600;"><i class="fa-solid fa-cube"></i> Carica Scansione 3D</label>
+                    <input type="file" id="scan3D" accept=".obj,.dae,.gltf,.glb,.usdz,.step,.stl,.zip" style="display:none;">
+                </div>
+            </div>
+
+            <!-- Misure Scale -->
+            <div class="form-group" style="padding: 15px; border: 2px solid #8b5cf6; border-radius: 8px; margin-bottom: 20px; background: #f5f3ff;">
+                <label style="color:#6d28d9; font-weight:700; margin-bottom:10px; display:block;"><i class="fa-solid fa-stairs"></i> Misure Scale e Gradini</label>
+                <p style="font-size: 0.8em; color: #4b5563; margin-bottom: 15px;">Costruisci la tua scala a blocchi o inserisci gradini speciali manualmente. L'app calcola lo sviluppo totale in automatico.</p>
+                
+
+
+
+                <!-- CONTENITORE: WIZARD MODELLI PREDEFINITI -->
+
+                <!-- CONTENITORE: COSTRUTTORE A BLOCCHI VISUALE -->
+
+
+                <!-- CONTENITORE: INSERIMENTO MANUALE (VECCHIA UI) -->
+                <div id="stairs-manual-mode" style="display: block;">
+                    <!-- Selettore Sagoma Pianta -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; color: #4b5563; display: block; margin-bottom: 8px; font-size:0.9em;"><i class="fa-solid fa-draw-polygon"></i> Forma della Superficie (Vista dall'Alto)</label>
+                    <div class="step-shape-selector" style="flex-wrap: wrap;">
+                        <div class="step-shape-card" id="card-rettangolare" onclick="SopralluogoApp.selectStepShape('rettangolare')">
+                            <svg viewBox="0 0 100 100"><rect x="15" y="30" width="70" height="40" fill="none" stroke="currentColor" stroke-width="6"/></svg>
+                            <span>Standard</span>
+                        </div>
+                        <div class="step-shape-card" id="card-pie_sx" onclick="SopralluogoApp.selectStepShape('pie_sx')">
+                            <svg viewBox="0 0 100 100"><polygon points="15,15 85,15 15,85" fill="none" stroke="currentColor" stroke-width="6"/></svg>
+                            <span>Piè d'oca Sx</span>
+                        </div>
+                        <div class="step-shape-card" id="card-pie_dx" onclick="SopralluogoApp.selectStepShape('pie_dx')">
+                            <svg viewBox="0 0 100 100"><polygon points="15,15 85,15 85,85" fill="none" stroke="currentColor" stroke-width="6"/></svg>
+                            <span>Piè d'oca Dx</span>
+                        </div>
+                        <div class="step-shape-card" id="card-pie_sx_chius" onclick="SopralluogoApp.selectStepShape('pie_sx_chius')">
+                            <svg viewBox="0 0 100 100"><polygon points="85,15 85,85 15,85" fill="none" stroke="currentColor" stroke-width="6"/></svg>
+                            <span>Oca Sx (Chiusura)</span>
+                        </div>
+                        <div class="step-shape-card" id="card-pie_dx_chius" onclick="SopralluogoApp.selectStepShape('pie_dx_chius')">
+                            <svg viewBox="0 0 100 100"><polygon points="15,15 15,85 85,85" fill="none" stroke="currentColor" stroke-width="6"/></svg>
+                            <span>Oca Dx (Chiusura)</span>
+                        </div>
+                        <div class="step-shape-card" id="card-pianerottolo" onclick="SopralluogoApp.selectStepShape('pianerottolo')">
+                            <svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" fill="none" stroke="currentColor" stroke-width="6"/></svg>
+                            <span>Pianerottolo</span>
+                        </div>
+                        <div class="step-shape-card" id="card-libero" onclick="SopralluogoApp.selectStepShape('libero')">
+                            <svg viewBox="0 0 100 100"><polygon points="15,85 45,15 85,35 75,85" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="4,2"/></svg>
+                            <span>Disegno Libero</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTENITORE FLEX: AFFIANCA MISURE E ANTEPRIMA 2D -->
+                <div id="stairs-misure-and-2d-wrapper" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; align-items: stretch;">
+
+                    <!-- NEW: Quote Dimensioni SVGs Pianta -->
+                    <div id="step-dimensions-container" style="display: none; flex: 1; min-width: 380px; background: #fff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 10px 15px; margin-bottom: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 10px;">
+                        <h5 style="margin-top:0; margin-bottom:0; color:#5b21b6; font-size:1em;"><i class="fa-solid fa-draw-polygon"></i> Misure in Pianta (cm)</h5>
+                        <div style="font-size: 0.75em; color: #64748b;">
+                            1. Inserisci in cm. 2. Clicca sui lati per:
+                        </div>
+                        <div style="display: inline-flex; gap: 15px; font-size:0.85em;">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px; color: #6d28d9; font-weight: 600;">
+                                <input type="radio" name="edgeSelectMode" value="toro" data-was-checked="false" onclick="if(this.dataset.wasChecked === 'true') { this.checked = false; this.dataset.wasChecked = 'false'; } else { document.querySelectorAll('input[name=edgeSelectMode]').forEach(r=>r.dataset.wasChecked='false'); this.dataset.wasChecked='true'; }"> Toro (Viola)
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px; color: #059669; font-weight: 600;">
+                                <input type="radio" name="edgeSelectMode" value="batti" data-was-checked="false" onclick="if(this.dataset.wasChecked === 'true') { this.checked = false; this.dataset.wasChecked = 'false'; } else { document.querySelectorAll('input[name=edgeSelectMode]').forEach(r=>r.dataset.wasChecked='false'); this.dataset.wasChecked='true'; }"> Batti. (Verde)
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px; color: #1d4ed8; font-weight: 600;">
+                                <input type="radio" name="edgeSelectMode" value="attacco" data-was-checked="false" onclick="if(this.dataset.wasChecked === 'true') { this.checked = false; this.dataset.wasChecked = 'false'; } else { document.querySelectorAll('input[name=edgeSelectMode]').forEach(r=>r.dataset.wasChecked='false'); this.dataset.wasChecked='true'; }"> Attacco (Blu)
+                            </label>
+                        </div>
+                        <select id="techProfiloFrontale" class="form-control" style="width: auto; padding: 2px 6px; font-size: 0.8em; height:auto;">
+                            <option value="Toro">Bordo: A Toro</option>
+                            <option value="Squadrato">Bordo: Squadrato</option>
+                            <option value="A Elle">Bordo: A Elle</option>
+                            <option value="Filo">Bordo: A Filo</option>
+                        </select>
+                    </div>
+                    
+                    <div id="shape-scale-indicator" style="font-size: 0.8em; font-weight: bold; color: #0284c7; margin-bottom: 5px; text-align: right; display: none;">Scala 1:--</div>
+                    <input type="hidden" id="techStepShapeType" value="">
+
+                    <!-- Layout SVG e Inputs Esterni -->
+                    <div id="svg-pianerottolo" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 5px;">
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimPianLung" class="floating-input-static" placeholder="Lato Su" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 1; text-align: right;"><input type="number" id="dimPianSx" class="floating-input-static" placeholder="Lato Sx" value="30" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center; position: relative;">
+                                <svg viewBox="0 0 200 150" style="display: block; margin: 0 auto; width: 100%; height: auto; max-width: 240px;">
+                                    <polygon id="poly-bg-pian" points="50,25 150,25 150,125 50,125" fill="#f8fafc" stroke="none"/>
+                                    <line id="line-pian-top" x1="50" y1="25" x2="150" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-pian-right" x1="150" y1="25" x2="150" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-pian-bottom" x1="50" y1="125" x2="150" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-pian-left" x1="50" y1="25" x2="50" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                </svg>
+                            </div>
+                            <div style="grid-column: 3; text-align: left;"><input type="number" id="dimPianProf" class="floating-input-static" placeholder="Lato Dx" value="30" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimPianGiu" class="floating-input-static" placeholder="Lato Giu" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="svg-rettangolare" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 5px;">
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimRetLung" class="floating-input-static" placeholder="Larghezza" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 1; text-align: right;"></div>
+                            <div style="grid-column: 2; text-align: center; position: relative;">
+                                <svg viewBox="0 0 200 150" style="display: block; margin: 0 auto; width: 100%; height: auto; max-width: 240px;">
+                                    <polygon id="poly-bg-ret" points="40,40 160,40 160,110 40,110" fill="#f8fafc" stroke="none"/>
+                                    <line id="line-ret-top" x1="40" y1="40" x2="160" y2="40" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-ret-right" x1="160" y1="40" x2="160" y2="110" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-ret-bottom" x1="160" y1="110" x2="40" y2="110" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-ret-left" x1="40" y1="110" x2="40" y2="40" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                </svg>
+                            </div>
+                            <div style="grid-column: 3; text-align: left;"><input type="number" id="dimRetProf" class="floating-input-static" placeholder="Pedata" value="30" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center;"></div>
+                        </div>
+                    </div>
+
+                    <div id="svg-pie_sx" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 5px;">
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimPieSxTop" class="floating-input-static" placeholder="Lato Su" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 1; text-align: right;"><input type="number" id="dimPieSxLeft" class="floating-input-static" placeholder="Lato Sx" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center; position: relative;">
+                                <svg viewBox="0 0 200 150" style="display: block; margin: 0 auto; width: 100%; height: auto; max-width: 240px;">
+                                    <polygon id="poly-bg-piesx" points="50,25 150,25 50,125" fill="#f8fafc" stroke="none"/>
+                                    <line id="line-piesx-top" x1="50" y1="25" x2="150" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piesx-diag" x1="150" y1="25" x2="50" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piesx-left" x1="50" y1="125" x2="50" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                </svg>
+                            </div>
+                            <div style="grid-column: 3; text-align: left;"><input type="number" id="dimPieSxDiag" class="floating-input-static" style="width:80px; text-align:center;" oninput="this.dataset.manual=(this.value!=='')?'true':'false'" placeholder="Ipotenusa"></div>
+                            <div style="grid-column: 2; text-align: center;"></div>
+                        </div>
+                    </div>
+
+                    <div id="svg-pie_dx" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 5px;">
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimPieDxTop" class="floating-input-static" placeholder="Lato Su" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 1; text-align: right;"><input type="number" id="dimPieDxDiag" class="floating-input-static" style="width:80px; text-align:center;" oninput="this.dataset.manual=(this.value!=='')?'true':'false'" placeholder="Ipotenusa"></div>
+                            <div style="grid-column: 2; text-align: center; position: relative;">
+                                <svg viewBox="0 0 200 150" style="display: block; margin: 0 auto; width: 100%; height: auto; max-width: 240px;">
+                                    <polygon id="poly-bg-piedx" points="50,25 150,25 150,125" fill="#f8fafc" stroke="none"/>
+                                    <line id="line-piedx-top" x1="50" y1="25" x2="150" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piedx-right" x1="150" y1="25" x2="150" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piedx-diag" x1="150" y1="125" x2="50" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                </svg>
+                            </div>
+                            <div style="grid-column: 3; text-align: left;"><input type="number" id="dimPieDxRight" class="floating-input-static" placeholder="Lato Dx" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center;"></div>
+                        </div>
+                    </div>
+
+                    <div id="svg-pie_sx_chius" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 5px;">
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimPieSxChiusTop" class="floating-input-static" placeholder="Lato Su" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 1; text-align: right;"><input type="number" id="dimPieSxChiusDiag" class="floating-input-static" style="width:80px; text-align:center;" oninput="this.dataset.manual=(this.value!=='')?'true':'false'" placeholder="Ipotenusa"></div>
+                            <div style="grid-column: 2; text-align: center; position: relative;">
+                                <svg viewBox="0 0 200 150" style="display: block; margin: 0 auto; width: 100%; height: auto; max-width: 240px;">
+                                    <polygon id="poly-bg-piesxchius" points="50,25 150,25 150,125" fill="#f8fafc" stroke="none"/>
+                                    <line id="line-piesxchius-top" x1="50" y1="25" x2="150" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piesxchius-right" x1="150" y1="25" x2="150" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piesxchius-diag" x1="150" y1="125" x2="50" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                </svg>
+                            </div>
+                            <div style="grid-column: 3; text-align: left;"><input type="number" id="dimPieSxChiusRight" class="floating-input-static" placeholder="Lato Dx" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center;"></div>
+                        </div>
+                    </div>
+
+                    <div id="svg-pie_dx_chius" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 5px;">
+                            <div style="grid-column: 2; text-align: center;"><input type="number" id="dimPieDxChiusTop" class="floating-input-static" placeholder="Lato Su" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 1; text-align: right;"><input type="number" id="dimPieDxChiusLeft" class="floating-input-static" placeholder="Lato Sx" value="100" oninput="SopralluogoApp.drawStepShape()"></div>
+                            <div style="grid-column: 2; text-align: center; position: relative;">
+                                <svg viewBox="0 0 200 150" style="display: block; margin: 0 auto; width: 100%; height: auto; max-width: 240px;">
+                                    <polygon id="poly-bg-piedxchius" points="50,25 150,25 50,125" fill="#f8fafc" stroke="none"/>
+                                    <line id="line-piedxchius-top" x1="50" y1="25" x2="150" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piedxchius-diag" x1="150" y1="25" x2="50" y2="125" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                    <line id="line-piedxchius-left" x1="50" y1="125" x2="50" y2="25" class="edge-line" stroke-width="6" onclick="SopralluogoApp.toggleEdgeState(this)"/>
+                                </svg>
+                            </div>
+                            <div style="grid-column: 3; text-align: left;"><input type="number" id="dimPieDxChiusDiag" class="floating-input-static" style="width:80px; text-align:center;" oninput="this.dataset.manual=(this.value!=='')?'true':'false'" placeholder="Ipotenusa"></div>
+                            <div style="grid-column: 2; text-align: center;"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="svg-libero" class="dimension-svg-wrapper" style="display: none; max-width: 100%;">
+                        <div style="display: flex; flex-direction:column; align-items: center; gap: 10px;">
+                            <p style="font-size:0.85rem; color:#64748b; margin:0; text-align:center;">Clicca nell'area per disegnare i vertici del gradino (chiudi cliccando sul punto iniziale).<br>Sarà ridimensionato in base a Larghezza e Pedata finali nella tabella.</p>
+                            <div style="position: relative; width:280px; height:240px; border:1px dashed #cbd5e1; background:#f1f5f9; cursor:crosshair;" id="libero-canvas-wrapper">
+                                <canvas id="libero-draw-canvas" width="280" height="240" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;"></canvas>
+                                <svg id="libero-interactive-svg" viewBox="0 0 280 240" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; pointer-events:none;">
+                                    <!-- Genereremo le linee qui per farle cliccare -->
+                                    <polygon id="poly-bg-libero" points="" fill="#f8fafc" stroke="none" style="pointer-events:all;"/>
+                                    <g id="libero-edges-group" style="pointer-events:all;"></g>
+                                    <g id="libero-labels-group" style="pointer-events:none;"></g>
+                                </svg>
+                            </div>
+
+                            <!-- PANNELLO LIVE: input misura per ogni segmento disegnato -->
+                            <div id="libero-segment-panel" style="display:none; background:#f5f3ff; border:2px solid #7c3aed; border-radius:12px; padding:10px 14px; width:100%; max-width:280px; box-sizing:border-box; box-shadow:0 4px 15px rgba(91,33,182,0.15);">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                    <span id="libero-seg-badge" style="background:#5b21b6; color:#fff; border-radius:50%; width:24px; height:24px; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">L1</span>
+                                    <span style="font-size:0.8em; color:#5b21b6; font-weight:700;">Quant'è lungo questo lato?</span>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="number" id="libero-seg-input" step="0.1" min="0.1" placeholder="es. 120"
+                                        style="flex:1; padding:8px 10px; border:2px solid #7c3aed; border-radius:8px; font-size:1.1em; font-weight:700; text-align:center; color:#3b0764; outline:none;"
+                                        onkeydown="if(event.key==='Enter'){ event.preventDefault(); event.stopPropagation(); SopralluogoApp.confirmLiberoSegment(); }"
+                                        onkeypress="event.stopPropagation();"
+                                        onkeyup="event.stopPropagation();">
+                                    <span style="font-size:0.85em; color:#6d28d9; font-weight:600;">cm</span>
+                                    <button type="button" onclick="SopralluogoApp.confirmLiberoSegment()"
+                                        style="padding:8px 13px; background:#5b21b6; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.95em;">
+                                        <i class="fa-solid fa-check"></i> Ok
+                                    </button>
+                                    <button type="button" onclick="SopralluogoApp.skipLiberoSegment()"
+                                        style="padding:8px 10px; background:#ede9fe; color:#6d28d9; border:1px solid #c4b5fd; border-radius:8px; cursor:pointer; font-size:0.85em;">
+                                        Salta
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                                <button type="button" class="btn-secondary" style="font-size:0.8rem; padding:4px 8px;" onclick="SopralluogoApp.clearLiberoShape()"><i class="fa-solid fa-eraser"></i> Ridisegna</button>
+                                <button type="button" style="font-size:0.8rem; padding:4px 10px; background:#5b21b6; color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:600;" onclick="SopralluogoApp.openLiberoMisureModal()"><i class="fa-solid fa-ruler-combined"></i> Inserisci Misure Esatte</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Misure Esatte Disegno Libero -->
+                    <div id="liberoMisureModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:11000; align-items:center; justify-content:center; backdrop-filter:blur(3px);">
+                        <div style="background:#fff; border-radius:16px; padding:24px; max-width:480px; width:94%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.35); position:relative;">
+                            <button onclick="SopralluogoApp.closeLiberoMisureModal()" style="position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.3em; cursor:pointer; color:#94a3b8;">✕</button>
+                            <h4 style="margin:0 0 4px; color:#5b21b6; font-size:1em;"><i class="fa-solid fa-ruler-combined"></i> Inserisci Misure Esatte (cm)</h4>
+                            <p style="font-size:0.8em; color:#64748b; margin:0 0 14px;">Aggiungi ogni vertice con le sue coordinate reali in cm. Il sistema genera la sagoma in proporzione.</p>
+
+                            <div id="liberoVertexInputList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                <!-- Righe vertici iniettate via JS -->
+                            </div>
+                            <button type="button" onclick="SopralluogoApp.addLiberoVertexRow()" style="display:block; width:100%; padding:8px; background:#f1f5f9; border:1.5px dashed #cbd5e1; border-radius:8px; cursor:pointer; font-size:0.9em; color:#475569; font-weight:600; margin-bottom:14px;">
+                                <i class="fa-solid fa-plus"></i> Aggiungi Vertice
+                            </button>
+
+                            <!-- Anteprima mini canvas -->
+                            <div style="text-align:center; margin-bottom:14px;">
+                                <canvas id="liberoModalPreviewCanvas" width="260" height="180" style="border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; width:260px; height:180px;"></canvas>
+                                <div id="liberoModalSideLengths" style="font-size:0.75em; color:#475569; margin-top:6px; line-height:1.6;"></div>
+                            </div>
+
+                            <div style="display:flex; gap:10px;">
+                                <button type="button" onclick="SopralluogoApp.applyLiberoMisureModal()" style="flex:1; padding:12px; background:#5b21b6; color:#fff; border:none; border-radius:8px; font-size:0.95em; font-weight:700; cursor:pointer;"><i class="fa-solid fa-check"></i> Applica Sagoma</button>
+                                <button type="button" onclick="SopralluogoApp.closeLiberoMisureModal()" style="padding:12px 18px; background:#f1f5f9; color:#334155; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.95em; font-weight:600; cursor:pointer;">Annulla</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- COMPACT RIBBON: Alzata & Settings -->
+                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; align-items:center; background:#f8fafc; padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0; margin-top:5px; font-size:0.85em;">
+                        <div>
+                            <strong style="color:#475569; margin-right:5px;">Rivestimento:</strong>
+                            <label style="cursor:pointer; margin-right:8px; color:#0369a1; font-weight:500;"><input type="radio" name="radRivestimentoAlz" id="radRivConAlz" checked> Alzata + Pedata</label>
+                            <label style="cursor:pointer; color:#be185d; font-weight:500;"><input type="radio" name="radRivestimentoAlz" id="radRivSenzaAlz"> Solo pedata</label>
+                        </div>
+                        <div style="width:1px; height:20px; background:#cbd5e1; display:inline-block;"></div>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <strong style="color:#475569;">Altezza(cm):</strong>
+                            <input type="number" id="dimAlzataSagoma" step="1" style="width:50px; padding:2px; border:1px solid #cbd5e1; border-radius:3px; font-weight:bold; text-align:center" placeholder="17" value="17">
+                        </div>
+                        <div style="width:1px; height:20px; background:#cbd5e1; display:inline-block;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <strong style="color:#475569;">Batti. Alzata:</strong>
+                            <label style="cursor:pointer;"><input type="checkbox" id="chkAlzBattiSx"> Sx</label>
+                            <label style="cursor:pointer;"><input type="checkbox" id="chkAlzBattiDx"> Dx</label>
+                        </div>
+                    </div>
+                    
+                    <!-- ACTION BUTTONS ROW -->
+                    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <label style="font-weight:600; font-size:0.85em; color:#4b5563;">Tipo Gradino:</label>
+                            <select id="techTipoGradino" class="form-control" style="width:auto; padding:4px 8px; font-size:0.85em; font-weight:bold; color:#5b21b6; height:auto;">
+                                <option value="Pianerottolo">Pianerottolo</option>
+                                <option value="Gradino d'avvio">Gradino d'avvio</option>
+                                <option value="Gradino standard" selected>Gradino standard</option>
+                                <option value="Piè d'oca dx">Piè d'oca dx</option>
+                                <option value="Piè d'oca sx">Piè d'oca sx</option>
+                                <option value="Piè d'oca dx (chiusura)">Piè d'oca dx (chiusura)</option>
+                                <option value="Piè d'oca sx (chiusura)">Piè d'oca sx (chiusura)</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:4px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                                <label style="font-size:0.85em; font-weight:bold; color:#475569; margin:0;">N° Pezzi:</label>
+                                <input type="number" step="1" id="dimQtaGradini" value="1" style="width:50px; padding:2px 4px; border:1px solid #94a3b8; border-radius:3px; text-align:center;">
+                            </div>
+                            <button class="btn-primary" style="font-size:0.85em; padding:6px 12px; background:#3b82f6;" type="button" onclick="SopralluogoApp.resetStepShape()"><i class="fa-solid fa-rotate-right"></i> Azzera</button>
+                            <button class="btn-secondary" style="font-size:0.85em; padding:6px 12px;" type="button" onclick="SopralluogoApp.selectStepShape('')"><i class="fa-solid fa-xmark"></i> Esci</button>
+                            <button class="btn-success" style="font-size:0.9em; padding:6px 15px; font-weight:bold;" type="button" onclick="SopralluogoApp.addShapeToStairsTableWrapper()"><i class="fa-solid fa-check"></i> Inserisci Misure</button>
+                        </div>
+                    </div>
+                    </div> <!-- chiude step-dimensions-container -->
+
+                    <!-- 2D VIEWER (PIANTA) - SPOSTATO QUI -->
+                    <div id="stairs-2d-wrapper" style="flex: 1; min-width: 320px; min-height: 300px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; position: relative; overflow: hidden; display: flex; flex-direction: column;">
+                        <div style="position:absolute; top:10px; left:10px; z-index:10; font-weight:bold; color:#334155; font-size:12px; background:rgba(255,255,255,0.7); box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:4px 8px; border-radius:4px;"><i class="fa-solid fa-draw-polygon"></i> Anteprima 2D (Pianta)</div>
+                        <!-- Toolbar selezione gradino -->
+                        <div id="step-2d-toolbar" style="display:none; position:absolute; top:10px; right:10px; z-index:20; flex-direction:column; align-items:flex-end; gap:4px;">
+                            <div style="background:#7c3aed; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:0.5px;" id="step-2d-toolbar-label">Gradino #-</div>
+                            <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
+                                <button title="Ruota -15°" onclick="Stairs2DViewer.rotateSelected(-15)" style="padding:5px 8px; background:#ede9fe; border:1px solid #7c3aed; border-radius:6px; cursor:pointer; font-size:13px;">↺ 15°</button>
+                                <button title="Ruota +15°" onclick="Stairs2DViewer.rotateSelected(15)" style="padding:5px 8px; background:#ede9fe; border:1px solid #7c3aed; border-radius:6px; cursor:pointer; font-size:13px;">↻ 15°</button>
+                                <button title="Ruota -90°" onclick="Stairs2DViewer.rotateSelected(-90)" style="padding:5px 8px; background:#ddd6fe; border:1px solid #7c3aed; border-radius:6px; cursor:pointer; font-size:13px; font-weight:700;">↺ 90°</button>
+                                <button title="Ruota +90°" onclick="Stairs2DViewer.rotateSelected(90)" style="padding:5px 8px; background:#ddd6fe; border:1px solid #7c3aed; border-radius:6px; cursor:pointer; font-size:13px; font-weight:700;">↻ 90°</button>
+                                <button title="Specchia orizzontale (asse X)" onclick="Stairs2DViewer.mirrorSelectedX()" style="padding:5px 8px; background:#e0f2fe; border:1px solid #0369a1; border-radius:6px; cursor:pointer; font-size:13px;">⇔ Sp.H</button>
+                                <button title="Specchia verticale (asse Z)" onclick="Stairs2DViewer.mirrorSelectedZ()" style="padding:5px 8px; background:#e0f2fe; border:1px solid #0369a1; border-radius:6px; cursor:pointer; font-size:13px;">⇕ Sp.V</button>
+                                <button title="Reset gradino selezionato" onclick="Stairs2DViewer.resetSelected()" style="padding:5px 8px; background:#fee2e2; border:1px solid #dc2626; border-radius:6px; cursor:pointer; font-size:13px;">↩ Reset</button>
+                            </div>
+                        </div>
+                        <!-- Reset tutto (sempre visibile in basso) -->
+                        <div style="position:absolute; bottom:8px; right:8px; z-index:15;">
+                            <button title="Reset tutte le posizioni manuali" onclick="Stairs2DViewer.resetAllOffsets()" style="padding:4px 10px; background:rgba(255,255,255,0.85); border:1px solid #94a3b8; border-radius:6px; cursor:pointer; font-size:11px; color:#475569;"><i class="fa-solid fa-rotate-left"></i> Reset tutto</button>
+                        </div>
+                        <!-- Hint selezione -->
+                        <div style="position:absolute; bottom:8px; left:8px; z-index:15; font-size:10px; color:#94a3b8; background:rgba(255,255,255,0.7); padding:2px 6px; border-radius:4px;">Click=seleziona · Shift+Click=multi · Trascina=sposta</div>
+                        <canvas id="stairs-2d-canvas" style="width:100%; height:100%; display:block; flex:1;"></canvas>
+                    </div>
+
+                </div> <!-- chiude contenitore flex mis-2d -->
+                </div> <!-- FINE stairs-manual-mode -->
+
+                <div style="overflow-x: auto; margin-bottom: 15px;">
+                    <table class="table" style="width: 100%; min-width: 1150px; background: #fff; border-collapse: collapse; text-align: left; font-size: 0.9em;">
+                        <thead style="background: #ede9fe; color: #5b21b6;">
+                            <tr>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width:28px; text-align:center; color:#a78bfa;" title="Trascina per riordinare"><i class="fa-solid fa-grip-vertical"></i></th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; min-width: 200px;">Rampa / Tipo</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 60px; min-width: 60px;">N°</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 75px; min-width: 75px;">Larg(m)</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 75px; min-width: 75px;">Ped(m)</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 85px; min-width: 85px;" title="Inserisci l'alzata. La spunta indica se l'alzata viene rivestita di legno e quindi calcolata nei Mq.">Alz(m) <i class="fa-solid fa-check"></i><button type="button" style="display:block; margin: 2px auto 0; font-size:9px; padding:2px 4px; background:#e2e8f0; color:#475569; border:1px solid #cbd5e1; border-radius:3px; cursor:pointer;" onclick="SopralluogoApp.applyAlzataToAll()" title="Copia la prima alzata su tutte">Applica a tutte</button></th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 85px; min-width: 85px; text-align: center;" title="Numero di lati col battiscopa sulla Pedata e sull'Alzata">Lati Batti.<br><span style="font-size:9px; font-weight:normal;">(Ped/Alz)</span></th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 65px; min-width: 65px;" title="Numero di lati con bordo a Toro">N° Tori</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 75px; min-width: 75px;">Mq / Cad</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 75px; min-width: 75px; font-weight:bold;">Mq Tot</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 75px; min-width: 75px; font-weight:bold;">Ml Batti.</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 75px; min-width: 75px; font-weight:bold;">Ml Tori</th>
+                                <th style="padding: 8px; border: 1px solid #ddd6fe; width: 45px; text-align:center;"><i class="fa-solid fa-trash"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="stairsTableBody">
+                            <!-- JS injected rows -->
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #f8fafc; font-weight: bold;">
+                                <td colspan="7" style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">TOTALI SCALE:</td>
+                                <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">Mq/Ml -></td>
+                                <td id="tblTotStairsMq" style="padding: 8px; border: 1px solid #cbd5e1; color:#0f172a;">0.00</td>
+                                <td id="tblTotStairsMl" style="padding: 8px; border: 1px solid #cbd5e1; color:#be185d;">0.00</td>
+                                <td id="tblTotStairsTori" style="padding: 8px; border: 1px solid #cbd5e1; color:#6d28d9;">0.00</td>
+                                <td style="border: 1px solid #cbd5e1;"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div id="stairsToriSummary" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.9em; line-height:1.5;">
+                    <!-- JS injected distincta tori -->
+                </div>
+                
+                <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
+                    <button class="btn-primary" style="background:#8b5cf6;" type="button" onclick="SopralluogoApp.addStairRow()"><i class="fa-solid fa-plus"></i> Aggiungi Rampa / Gradino Manuale (Tabella)</button>
+                </div>
+            </div>
+
+            <!-- 2D / 3D PREVIEWERS CONTAINER -->
+            <div id="stairs-previews-container" style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 10px; margin-top:20px;">
+                
+                <!-- GROUPED 2D SHAPE SUMMARY TABLE -->
+                <div id="stairs-summary-wrapper" style="flex:1; min-width:300px; background:#fff; border:1px solid #cbd5e1; border-radius:8px; position:relative; display:flex; flex-direction:column;">
+                     <div style="font-weight:bold; color:#334155; font-size:12px; background:#f8fafc; padding:8px 12px; border-bottom:1px solid #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+                         <span><i class="fa-solid fa-layer-group"></i> Riepilogo Tagli e Sagome Gradini</span>
+                         <button type="button" onclick="SopralluogoApp.printStairsSummary()" class="btn-secondary no-print" style="padding:4px 8px; font-size:11px;"><i class="fa-solid fa-print"></i> Stampa Tabella Singola</button>
+                     </div>
+                     <div style="padding:10px; overflow-x:auto; flex:1;">
+                         <table id="stairsSummaryTable" style="width:100%; border-collapse:collapse; font-size:11.5px; text-align:center;">
+                             <thead>
+                                 <tr style="background:#f1f5f9; color:#475569; font-weight:700;">
+                                     <th style="padding:6px; border:1px solid #e2e8f0; width:120px;">Sagoma 2D</th>
+                                     <th style="padding:6px; border:1px solid #e2e8f0;">Misura Gradino (cm)</th>
+                                     <th style="padding:6px; border:1px solid #e2e8f0; width:45px;">N°<br>Gradini</th>
+                                     <th style="padding:6px; border:1px solid #e2e8f0;">Misura Toro (cm)</th>
+                                     <th style="padding:6px; border:1px solid #e2e8f0; width:45px;">N°<br>Tori</th>
+                                     <th style="padding:6px; border:1px solid #e2e8f0;">Misura Batti. (cm)</th>
+                                     <th style="padding:6px; border:1px solid #e2e8f0; width:55px;">Lati Batti.</th>
+                                 </tr>
+                             </thead>
+                             <tbody id="stairsSummaryBody">
+                                 <!-- JS Injected -->
+                                 <tr><td colspan="7" style="padding:20px; color:#94a3b8;">Aggiungi gradini alla tabella per vederne il riepilogo</td></tr>
+                             </tbody>
+                         </table>
+                     </div>
+                </div>
+
+            </div>
+            
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 30px; justify-content:center;">
+                <button class="btn-secondary" style="font-size:0.9em; padding: 6px 15px;" type="button" onclick="var el = document.getElementById('stairs-previews-container'); if(el.style.display==='none'){el.style.display='flex'; this.innerHTML=`<i class='fa-solid fa-eye-slash'></i> Nascondi Anteprime`;}else{el.style.display='none'; this.innerHTML=`<i class='fa-solid fa-eye'></i> Mostra Anteprime`;}"><i class="fa-solid fa-eye-slash"></i> Nascondi Anteprime</button>
+            </div>
+
+            <div class="form-group">
+                <label>Materiale Da Ordinare (Mq/Ml Totali, Colla, Materassino, Profili) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Materiale materiale da ordinare, colla materassino e profili')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techDaOrdinare" class="form-control" rows="2"></textarea>
+                    <button class="btn-mic" data-target="techDaOrdinare" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <!-- Finali ed Email -->
+            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;">
+            
+            <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px;">
+                <label style="color:#b91c1c;">Lavori a Carico del Cliente (visibili al cliente) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Lavori a carico del cliente prima della posa')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techLavoriCliente" class="form-control" rows="3" placeholder="Questi lavori verranno inclusi nella mail..."></textarea>
+                    <button class="btn-mic" data-target="techLavoriCliente" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px;">
+                <label style="color:#b91c1c;">Note Aggiuntive (visibili al cliente) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Note aggiuntive per il cliente')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techNotePubbliche" class="form-control" rows="2"></textarea>
+                    <button class="btn-mic" data-target="techNotePubbliche" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group" style="background:#f1f5f9; padding:10px; border-radius:8px;">
+                <label>Note Interne (SOLO PER IL TEAM) <button class="btn-speak" type="button" tabindex="-1" onclick="SopralluogoApp.speakText('Note interne riservate al team')"><i class="fa-solid fa-volume-high"></i></button></label>
+                <div class="input-with-mic">
+                    <textarea id="techNoteInterne" class="form-control" rows="2" placeholder="Non verranno inviate per email..."></textarea>
+                    <button class="btn-mic" data-target="techNoteInterne" type="button"><i class="fa-solid fa-microphone"></i></button>
+                </div>
+            </div>
+            
+            <!-- Sezione 3: Riepilogo e Invio -->
+            <hr style="margin: 30px 0; border:0; border-top:1px solid #cbd5e1;">
+            <div style="background:#f1f5f9; padding:8px 15px; margin-bottom:15px; border-radius:6px; border-left:4px solid #10b981;">
+                <h4 style="margin:0; color:#1e293b; font-size:1.1em;">3. Riepilogo e Invio Email</h4>
+            </div>
+
+            <div class="form-group" style="padding: 10px;">
+                <label style="color:#1e293b; font-weight:600; margin-bottom:8px;">Testo Email (Modificabile liberamente prima dell'invio)</label>
+                <textarea id="finalEmailText" class="form-control" rows="16" style="border:1px solid #cbd5e1; border-radius:8px; display:block; width:100%; box-sizing:border-box; padding:12px; font-family:inherit; font-size:14px; line-height:1.5; background:#fff; margin-bottom:15px;"></textarea>
+            </div>
+
+            <div class="step-actions vertical-actions">
+                <div style="display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:15px;">
+                    <button class="btn-secondary" onclick="SopralluogoApp.goToStep('step-start')">Annulla e Esci Senza Salvare</button>
+                </div>
+                <button class="btn-success btn-large" style="background:#10b981;" onclick="SopralluogoApp.saveAndExit()">
+                    <i class="fa-solid fa-floppy-disk"></i> Salva Subito ed Esci
+                </button>
+                <button class="btn-primary btn-large" style="background:#8b5cf6; color:white;" onclick="SopralluogoApp.goToStep('step-preview-visual')">
+                    <i class="fa-solid fa-file-pdf"></i> Genera PDF (Anteprima / Stampa)
+                </button>
+                <button class="btn-success btn-large" style="background:#2563eb;" onclick="SopralluogoApp.saveAndNextUnit()">
+                    <i class="fa-solid fa-plus"></i> Salva e Aggiungi Altra Unità (Clone Condominio)
+                </button>
+                <button class="btn-success btn-large" onclick="SopralluogoApp.saveAndSend()">
+                    <i class="fa-solid fa-paper-plane"></i> Salva e Genera Email (Fine Lavoro)
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Step: Anteprima di Stampa e Salvataggio -->
+        <div id="step-preview-visual" class="step-container" style="display: none; background: #f8fafc; border:none; padding:0; box-shadow:none;">
+            <div class="step-header no-print" style="padding: 20px; border-bottom:1px solid #e2e8f0; background:#fff;">
+                <h3><i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i> Anteprima Scheda Tecnico</h3>
+                <span class="step-progress">Step 3 di 4</span>
+            </div>
+            
+            <div id="printArea" class="print-area">
+                <!-- Verrà riempito dinamicamente da JS con l'anteprima grafica stile A4 -->
+            </div>
+            
+            <div class="step-actions vertical-actions no-print" style="padding: 20px; background:#fff; border-top:1px solid #e2e8f0; margin-top:20px;">
+                <button class="btn-primary btn-large" onclick="window.doSafePrint()" style="background:#0ea5e9;">
+                    <i class="fa-solid fa-print"></i> Stampa / Esporta in PDF
+                </button>
+                <button class="btn-success btn-large" onclick="SopralluogoApp.resetAndExit()" style="background:#10b981;">
+                    <i class="fa-solid fa-check"></i> Chiudi e Inizia Nuova Scheda
+                </button>
+                <button class="btn-secondary btn-large" onclick="SopralluogoApp.goToStep('step-form'); setTimeout(()=>{document.getElementById('finalEmailText').scrollIntoView()}, 500);" style="background:#8b5cf6; color:white; border:none;">
+                    <i class="fa-solid fa-envelope"></i> Vai alla Generazione Email <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button class="btn-secondary" onclick="SopralluogoApp.goToStep('step-form')" style="margin-top: 10px;">
+                    <i class="fa-solid fa-arrow-left"></i> Torna alla Scheda (Modifica Dati)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Avviso Sql -->
+    <div id="sqlModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3>⚠️ Configurazione Database Aggiornata</h3>
+            <p>Per salvare la nuova "mega-scheda" sopralluoghi, aggiungi il campo JSONB al database.</p>
+            <p>Esegui questo script nel pannello SQL di Supabase:</p>
+            <textarea id="sqlSnippet" class="form-control" rows="8" readonly style="font-family: monospace; font-size: 11px;">
+CREATE TABLE IF NOT EXISTS sopralluoghi (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  client_id TEXT REFERENCES clients(id) ON DELETE SET NULL,
+  client_name TEXT NOT NULL,
+  client_address TEXT NOT NULL,
+  client_email TEXT,
+  tech_sottofondo TEXT,
+  tech_materiale TEXT,
+  tech_umidita TEXT,
+  tech_lavori TEXT,
+  tech_note TEXT,
+  full_data_json JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_by UUID REFERENCES auth.users(id)
+);
+ALTER TABLE sopralluoghi ADD COLUMN IF NOT EXISTS full_data_json JSONB;
+            </textarea>
+            <button class="btn-primary" onclick="document.getElementById('sqlModal').style.display='none'">Ho Capito, Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Voice Feedback UI -->
+    <div id="voiceFeedback" class="voice-feedback" style="display: none;">
+        <div class="ripple-wave"></div>
+        <i class="fa-solid fa-microphone mic-active"></i>
+        <span>In ascolto (ditta chiaro e forte)...</span>
+        <button id="btnStopMic" class="btn-stop-mic">Ferma</button>
+    </div>
+
+    <!-- Script 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/DragControls.js"></script>
+
+    <!-- Script App -->
+    <script src="sopralluoghi-app-v6.js"></script>
+</body>
+</html>

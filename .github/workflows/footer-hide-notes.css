@@ -1,0 +1,91 @@
+/**
+ * Stili Note Riorganizzate
+ * Note cliente e legal notes spostate sopra il footer
+ */
+
+/* Container per le note sopra il footer */
+#notes-before-footer-container {
+    margin-bottom: 0.3rem;
+    margin-top: 0.3rem;
+}
+
+/* Note cliente quando spostate sopra */
+#notes-before-footer-container #f-notes {
+    margin-bottom: 0.25rem !important;
+}
+
+#notes-before-footer-container #f-notes .notes-section h5 {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.2rem !important;
+    font-weight: 600;
+}
+
+#notes-before-footer-container #f-notes .notes-input,
+#notes-before-footer-container #f-notes #docNotes {
+    min-height: 45px !important;
+    max-height: 65px !important;
+    font-size: 0.73rem !important;
+    padding: 4px 6px !important;
+    line-height: 1.3 !important;
+}
+
+/* Legal notes quando spostate sopra */
+#notes-before-footer-container #f-legal-notes {
+    margin-bottom: 0.25rem !important;
+}
+
+#notes-before-footer-container .legal-text-row {
+    gap: 6px !important;
+}
+
+#notes-before-footer-container .legal-block {
+    font-size: 0.6rem !important;
+    line-height: 1.15 !important;
+    padding: 3px !important;
+}
+
+#notes-before-footer-container .legal-block strong {
+    font-size: 0.65rem !important;
+}
+
+/* Footer contiene SOLO bottom bar */
+.paper-footer-grid {
+    margin-top: 0.2rem !important;
+    margin-bottom: 0 !important;
+    padding-top: 0.3rem !important;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Bottom bar compatto */
+#f-bottom-bar {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#f-bottom-bar .bottom-footer-bar {
+    padding: 3px 0 !important;
+    margin: 0 !important;
+}
+
+/* Riduci icone e testi bottom bar */
+#f-bottom-bar .fa-earth-europe {
+    font-size: 2rem !important;
+}
+
+#f-bottom-bar .highlight-green {
+    font-size: 0.45rem !important;
+    line-height: 1 !important;
+}
+
+#f-bottom-bar .footer-socials-inline {
+    font-size: 0.6rem !important;
+}
+
+#f-bottom-bar .social-link {
+    font-size: 0.65rem !important;
+    margin: 0 1px !important;
+}
+
+#f-bottom-bar .recycle-badge {
+    font-size: 0.45rem !important;
+}

@@ -1,0 +1,401 @@
+/* CRM DASHBOARD STYLES */
+#viewClientCRM {
+    padding: 0;
+    /* il genitore .main-content ha già padding: 2rem */
+    background-color: #f8fafc;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Header Section */
+.crm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.crm-client-identity h1 {
+    font-size: 2rem;
+    color: #1e293b;
+    margin: 0;
+    font-weight: 700;
+}
+
+.crm-page-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.crm-client-identity .crm-subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin-top: 5px;
+    display: flex;
+    gap: 15px;
+}
+
+.crm-subtitle i {
+    margin-right: 5px;
+}
+
+.crm-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.crm-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.crm-btn-primary {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.crm-btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.crm-btn-secondary {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.crm-btn-secondary:hover {
+    background-color: #cbd5e1;
+}
+
+.crm-btn-whatsapp {
+    background-color: #22c55e;
+    color: white;
+}
+
+.crm-btn-email {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.crm-btn-drive {
+    background-color: #334155;
+    color: white;
+}
+
+/* Dashboard Grid */
+.crm-grid {
+    display: grid;
+    grid-template-columns: min(280px, 28%) 1fr;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* CRITICO: senza min-width:0 le celle grid possono sforare il contenitore */
+.crm-column-left,
+.crm-column-right {
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Card Common Styles */
+.crm-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #f1f5f9;
+}
+
+.crm-card h3 {
+    font-size: 1.1rem;
+    color: #334155;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Sidebar Info */
+.crm-info-row {
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: flex-start;
+}
+
+.crm-info-row i {
+    width: 24px;
+    color: #94a3b8;
+    margin-top: 3px;
+}
+
+.crm-info-label {
+    font-weight: 600;
+    color: #475569;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.crm-info-value {
+    color: #1e293b;
+    word-break: break-word;
+}
+
+/* Internal Notes */
+.crm-notes-box {
+    background-color: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 15px;
+    color: #92400e;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Stats Row */
+.crm-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.crm-stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.crm-stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 5px 0;
+}
+
+.crm-stat-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* History Table */
+.crm-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.crm-table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.crm-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.crm-table tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Status Badges (Reusing/Extending app styles) */
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-warning {
+    background-color: #fef9c3;
+    color: #854d0e;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-info {
+    background-color: #e0f2fe;
+    color: #075985;
+}
+
+/* Giobby List */
+.giobby-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed #cbd5e1;
+}
+
+.giobby-item:last-child {
+    border-bottom: none;
+}
+
+.giobby-date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.giobby-doc {
+    font-weight: 500;
+    color: #334155;
+}
+
+.giobby-amount {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .crm-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== GIOBBY DOCUMENT PREVIEW POPUP ===== */
+#crmGiobbyPreview {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    width: 320px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+    overflow: hidden;
+}
+
+#crmGiobbyPreview.visible {
+    display: block;
+}
+
+.giobby-preview-header {
+    padding: 10px 14px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.giobby-preview-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.giobby-preview-docnum {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1e293b;
+    flex: 1;
+}
+
+.giobby-preview-date {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.giobby-preview-body {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.giobby-preview-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+
+.giobby-preview-label {
+    color: #94a3b8;
+    min-width: 60px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding-top: 1px;
+}
+
+.giobby-preview-value {
+    color: #334155;
+    flex: 1;
+    word-break: break-word;
+}
+
+.giobby-preview-total {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px 10px;
+}
+
+.giobby-preview-total-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.giobby-preview-total-value {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1e293b;
+}

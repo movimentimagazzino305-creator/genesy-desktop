@@ -1,0 +1,8 @@
+{
+    "version":  "4.3.117-ROMAGNA",
+    "deployedAt":  "2026-09-05T07:54:00Z",
+    "changelog":  [
+                      "Nuovi selettori custom in-DOM per Modello e Finitura battiscopa che non perdono il focus",
+                      "Risolto problema di chiusura improvvisa del popup di battiscopa"
+                  ]
+}

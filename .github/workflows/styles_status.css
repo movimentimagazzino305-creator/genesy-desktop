@@ -1,0 +1,29 @@
+/* Status Styles used by updateEditorStatusUI */
+#editorStatus {
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#editorStatus.status-open {
+    color: #1e3a8a !important;
+    /* Blue-900 */
+    border-color: #1e3a8a !important;
+    background-color: #eff6ff !important;
+    /* Blue-50 */
+}
+
+#editorStatus.status-closed {
+    color: #14532d !important;
+    /* Green-900 */
+    border-color: #14532d !important;
+    background-color: #f0fdf4 !important;
+    /* Green-50 */
+}
+
+#editorStatus.status-lost {
+    color: #7f1d1d !important;
+    /* Red-900 */
+    border-color: #7f1d1d !important;
+    background-color: #fef2f2 !important;
+    /* Red-50 */
+}

@@ -1,11 +1,9 @@
 {
-  "version": "1.0.34",
-  "title": "Genesy Desktop v1.0.34",
+  "version": "1.0.35",
+  "title": "Aggiornamento Genesy Desktop",
   "changelog": [
-    "Risolto blocco installazione e caricamento iniziale",
-    "Avvio immediato senza attese di rete esterne",
-    "Chiusura sicura istanze precedenti senza errori NSIS"
+    "Miglioramenti generali e ottimizzazioni di sistema"
   ],
-  "createdAt": "2026-09-09T07:15:19.689Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.34/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-09-09T08:22:09.440Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.35/Genesy_Desktop_Setup.exe"
 }

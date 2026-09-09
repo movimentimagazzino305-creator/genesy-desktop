@@ -1,12 +1,10 @@
 {
-  "version": "1.0.37",
-  "title": "Aggiornamento Genesy Desktop v1.0.37",
+  "version": "1.0.38",
+  "title": "Aggiornamento Genesy Desktop v1.0.38",
   "changelog": [
-    "Ottimizzazione visualizzazione tabella preventivi a schermo intero",
-    "Cella quantita vuota all inserimento per digitazione rapida",
-    "Correzione tendina comuni unica con autocompilazione CAP/Provincia",
-    "Risolto filtro preventivi per agenti all avvio"
+    "Apertura e modifica preventivo cliccando direttamente sulla riga",
+    "Tutte le colonne visibili a schermo intero (inclusi pulsanti Azioni)"
   ],
-  "createdAt": "2026-09-09T20:35:50.648Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.37/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-09-09T21:11:49.592Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.38/Genesy_Desktop_Setup.exe"
 }

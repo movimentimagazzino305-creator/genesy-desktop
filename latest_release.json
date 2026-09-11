@@ -1,10 +1,9 @@
 {
-  "version": "1.0.44",
-  "title": "Fix selezione Studio Trama CRM e supporto ARK/GEOM/IMPRESA",
+  "version": "1.0.45",
+  "title": "Aggiornamento Genesy Desktop",
   "changelog": [
-    "Risoluzione interazione click modale Trama",
-    "Integrazione CRM Trama per ARK, GEOM e IMPRESA"
+    "Miglioramenti generali e ottimizzazioni di sistema"
   ],
-  "createdAt": "2026-09-11T16:28:48.524Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.44/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-09-11T17:13:48.247Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.45/Genesy_Desktop_Setup.exe"
 }

@@ -1,10 +1,9 @@
 {
-  "version": "1.0.46",
-  "title": "Aggiornamento Genesy Desktop (Fix Barre Ricerca)",
+  "version": "1.0.47",
+  "title": "Aggiornamento Genesy Desktop",
   "changelog": [
-    "Risolto definitivamente il blocco del cursore e del mouse sulle barre di ricerca",
-    "Ottimizzazione navigazione e gestione overlay responsive"
+    "Miglioramenti generali e ottimizzazioni di sistema"
   ],
-  "createdAt": "2026-09-11T21:07:50.255Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.46/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-09-14T13:25:37.054Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.47/Genesy_Desktop_Setup.exe"
 }

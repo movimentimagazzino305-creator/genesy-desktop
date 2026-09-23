@@ -1,9 +1,9 @@
 {
-  "version": "1.0.52",
-  "title": "Aggiornamento Genesy Desktop",
+  "version": "1.0.54",
+  "title": "fix 2 Overlay \"fantasma\"",
   "changelog": [
-    "Fix: campi di ricerca non digitabili all'avvio (focus Electron su Windows)"
+    "Overlay \"fantasma\""
   ],
-  "createdAt": "2026-09-22T04:41:01.628Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.52/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-09-23T16:17:52.488Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.54/Genesy_Desktop_Setup.exe"
 }

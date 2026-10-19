@@ -1,9 +1,9 @@
 {
-  "version": "1.0.54",
-  "title": "fix 2 Overlay \"fantasma\"",
+  "version": "1.0.58",
+  "title": "Aggiornamento Genesy Desktop",
   "changelog": [
-    "Overlay \"fantasma\""
+    "Miglioramenti generali e ottimizzazioni di sistema"
   ],
-  "createdAt": "2026-09-23T16:17:52.488Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.54/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-10-19T20:15:52.728Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.58/Genesy_Desktop_Setup.exe"
 }

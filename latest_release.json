@@ -1,9 +1,9 @@
 {
-  "version": "1.0.69",
-  "title": "Ripristino versione stabile",
+  "version": "1.0.71",
+  "title": "Aggiornamento Genesy Desktop",
   "changelog": [
-    "Ripristino versione precedente all'introduzione dei badge pagamenti nella scheda preventivi"
+    "Miglioramenti generali e ottimizzazioni di sistema"
   ],
-  "createdAt": "2026-11-24T10:27:02.608Z",
-  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.69/Genesy_Desktop_Setup.exe"
+  "createdAt": "2026-11-27T14:25:07.964Z",
+  "downloadUrl": "https://github.com/movimentimagazzino305-creator/genesy-desktop/releases/download/v1.0.71/Genesy_Desktop_Setup.exe"
 }
